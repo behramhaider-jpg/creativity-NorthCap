@@ -5,300 +5,167 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Canadian Microcap Public Screener</title>
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
-  <style>
-    :root, [data-theme="light"] {
-      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
-      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
-      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
-      --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
-      --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-border:#d4d1ca; --color-divider:#dcd9d5;
-      --color-text:#28251d; --color-text-muted:#66645e; --color-text-faint:#98958d; --color-text-inverse:#f9f8f4;
-      --color-primary:#01696f; --color-primary-hover:#0c4e54; --color-primary-highlight:#cedcd8;
-      --color-success:#437a22; --color-warning:#964219; --color-error:#a12c7b; --color-blue:#006494;
-      --radius-md:.55rem; --radius-lg:.85rem; --radius-xl:1rem;
-      --shadow-sm:0 1px 2px rgba(20,20,20,.06); --shadow-md:0 10px 28px rgba(20,20,20,.08);
-      --font-body:'Satoshi', Inter, sans-serif;
-    }
-    [data-theme="dark"] {
-      --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-surface-offset:#22211f; --color-border:#393836; --color-divider:#2a2927;
-      --color-text:#e3e0d9; --color-text-muted:#aeaba4; --color-text-faint:#79766f; --color-text-inverse:#171614;
-      --color-primary:#4f98a3; --color-primary-hover:#227f8b; --color-primary-highlight:#313b3b;
-      --color-success:#6daa45; --color-warning:#d6a16a; --color-error:#d163a7; --color-blue:#6aa8d8;
-      --shadow-sm:0 1px 2px rgba(0,0,0,.2); --shadow-md:0 12px 32px rgba(0,0,0,.34);
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;overflow:hidden}
-    body{font-family:var(--font-body);font-size:var(--text-base);line-height:1.55;background:var(--color-bg);color:var(--color-text)}
-    button,input,select{font:inherit;color:inherit} button{cursor:pointer;border:none;background:none} table{border-collapse:collapse;width:100%}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    .app{display:grid;grid-template-columns:300px 1fr;grid-template-rows:76px 1fr;height:100dvh}
-    .sidebar{grid-row:1/-1;background:var(--color-surface);border-right:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);padding:var(--space-6);overflow:auto;display:grid;align-content:start;gap:var(--space-6)}
-    .header{grid-column:2;display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:0 var(--space-6);background:color-mix(in srgb,var(--color-surface) 84%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid color-mix(in srgb,var(--color-text) 10%,transparent)}
-    .main{grid-column:2;overflow:auto;padding:var(--space-6);display:grid;gap:var(--space-4)}
-    .brand{display:flex;gap:var(--space-3);align-items:center}
-    .logo{width:40px;height:40px;color:var(--color-primary)}
-    .brand h1{font-size:var(--text-lg);line-height:1.1}
-    .small,.meta{font-size:var(--text-xs);color:var(--color-text-muted)}
-    .panel{background:var(--color-surface-2);border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}
-    .section{padding:var(--space-5)}
-    .nav{display:grid;gap:var(--space-2)}
-    .nav button{padding:.82rem .9rem;border-radius:var(--radius-lg);text-align:left;min-height:44px}
-    .nav button.active{background:var(--color-primary-highlight)}
-    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4)}
-    .kpi{padding:var(--space-5)}
-    .kpi h3{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted);margin-bottom:var(--space-2)}
-    .value{font-size:var(--text-xl);font-weight:700;font-variant-numeric:tabular-nums lining-nums}
-    .hero{display:grid;grid-template-columns:1.15fr .85fr;gap:var(--space-4)}
-    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-top:var(--space-5)}
-    .field{display:grid;gap:var(--space-2)}
-    .field label{font-size:var(--text-sm);font-weight:700}
-    .field input,.field select{min-height:44px;padding:.78rem .85rem;background:var(--color-bg);border:1px solid var(--color-border);border-radius:var(--radius-md)}
-    .btns{display:flex;gap:var(--space-3);margin-top:var(--space-5);flex-wrap:wrap}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);padding:.82rem 1rem;border-radius:var(--radius-md);min-height:44px;border:1px solid transparent}
-    .btn-primary{background:var(--color-primary);color:var(--color-text-inverse)} .btn-primary:hover{background:var(--color-primary-hover)}
-    .btn-secondary{border-color:color-mix(in srgb,var(--color-text) 12%,transparent)}
-    .search{min-width:320px;background:var(--color-surface-2);border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);border-radius:999px;padding:.72rem 1rem}
-    .grid{display:grid;grid-template-columns:1.35fr .65fr;gap:var(--space-4)}
-    th,td{padding:.8rem .7rem;border-bottom:1px solid var(--color-divider);text-align:left;font-size:var(--text-sm);font-variant-numeric:tabular-nums lining-nums;vertical-align:top}
-    th{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-muted)}
-    .table-wrap{overflow:auto}
-    .pill{display:inline-flex;align-items:center;padding:.3rem .55rem;border-radius:999px;font-size:var(--text-xs);font-weight:700}
-    .pass{background:color-mix(in srgb,var(--color-success) 18%,transparent);color:var(--color-success)}
-    .watch{background:color-mix(in srgb,var(--color-warning) 18%,transparent);color:var(--color-warning)}
-    .risk{background:color-mix(in srgb,var(--color-error) 18%,transparent);color:var(--color-error)}
-    .stack{display:grid;gap:var(--space-3)}
-    .mini{padding:var(--space-4);background:var(--color-surface);border:1px solid color-mix(in srgb,var(--color-text) 10%,transparent);border-radius:var(--radius-lg)}
-    .mini strong{display:block;margin-bottom:var(--space-1)}
-    .source-tag,.chip{display:inline-flex;align-items:center;padding:.34rem .6rem;border-radius:999px;font-size:var(--text-xs);font-weight:700;background:color-mix(in srgb,var(--color-primary) 12%,transparent)}
-    .chips{display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-4)}
-    .scorebox{display:grid;gap:var(--space-3)}
-    .row{display:grid;grid-template-columns:1fr auto;gap:var(--space-3);align-items:center}
-    .bar{height:10px;background:var(--color-surface-offset);border-radius:999px;overflow:hidden;margin-top:.35rem}
-    .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--color-primary),var(--color-blue));border-radius:999px}
-    .source-list li{margin-left:1rem;margin-bottom:.5rem;color:var(--color-text-muted)}
-    @media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.hero,.grid{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}}
-    @media (max-width:768px){html,body{overflow:auto}.app{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;height:auto}.sidebar{grid-row:auto;border-right:none;border-bottom:1px solid color-mix(in srgb,var(--color-text) 10%,transparent)}.header,.main{grid-column:auto}.header{padding:var(--space-4)}.main{padding:var(--space-4)}.kpis,.controls{grid-template-columns:1fr}.search{min-width:0;width:100%}}
-  </style>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<a href="#content" class="sr-only">Skip to content</a>
-<div class="app">
-  <aside class="sidebar">
-    <div class="brand">
-      <svg class="logo" viewBox="0 0 64 64" fill="none" aria-label="NorthCap Public logo">
-        <rect x="8" y="12" width="18" height="40" rx="7" fill="currentColor" opacity=".88"></rect>
-        <path d="M34 52V12l22 20-22 20Z" fill="currentColor"></path>
-      </svg>
-      <div>
-        <h1>NorthCap Public</h1>
-        <div class="small">Canadian microcap screener</div>
+  <a href="#content" class="sr-only">Skip to content</a>
+  <div class="app-shell">
+    <aside class="sidebar panel">
+      <div class="brand-block">
+        <svg class="logo" viewBox="0 0 64 64" fill="none" aria-label="NorthCap Public logo">
+          <rect x="8" y="12" width="18" height="40" rx="7" fill="currentColor" opacity=".88"></rect>
+          <path d="M34 52V12l22 20-22 20Z" fill="currentColor"></path>
+        </svg>
+        <div>
+          <h1>NorthCap Public</h1>
+          <p class="meta">Interactive Canadian microcap screener</p>
+        </div>
       </div>
-    </div>
-    <nav class="nav" aria-label="Primary">
-      <button class="active">Public screener</button>
-      <button>Management review</button>
-      <button>Analyst snapshot</button>
-      <button>Valuation compare</button>
-      <button>Export notes</button>
-    </nav>
-    <div class="stack">
-      <div class="mini">
-        <strong>Allowed data only</strong>
-        <div class="small">Public filings, company websites, exchange pages, and public finance pages. No paid databases required.</div>
+
+      <nav class="nav" aria-label="Primary">
+        <button class="nav-btn active" data-view="screen">Screen</button>
+        <button class="nav-btn" data-view="compare">Compare</button>
+        <button class="nav-btn" data-view="sources">Sources</button>
+      </nav>
+
+      <div class="side-stack">
+        <div class="mini-card">
+          <div class="label">Public-only rule</div>
+          <p>Designed for public filings, exchange pages, company IR pages, and public finance summaries.</p>
+        </div>
+        <div class="mini-card">
+          <div class="label">Interactive elements</div>
+          <p>Filters, sortable table, company detail panel, compare view, and live score updates in-browser.</p>
+        </div>
       </div>
-      <div class="mini">
-        <strong>Screen definition</strong>
-        <div class="small">Canadian issuers, roughly $50M-$300M market cap, often TSX-V listed, with thinner liquidity and higher volatility.</div>
-      </div>
+    </aside>
+
+    <div class="main-column">
+      <header class="topbar panel">
+        <div>
+          <div class="meta">GitHub-ready static app</div>
+          <strong>Canadian Microcap Opportunity Screener</strong>
+        </div>
+        <div class="topbar-actions">
+          <input id="searchInput" class="search" type="search" placeholder="Search ticker or company" aria-label="Search ticker or company">
+          <button id="themeToggle" class="btn btn-secondary" type="button" aria-label="Switch theme">◐</button>
+        </div>
+      </header>
+
+      <main id="content" class="content">
+        <section id="screenView" class="view active-view">
+          <section class="kpi-grid">
+            <article class="panel kpi-card"><div class="label">Universe</div><div class="value" id="universeCount">0</div><div class="meta">Companies loaded</div></article>
+            <article class="panel kpi-card"><div class="label">Passing screen</div><div class="value" id="passCount">0</div><div class="meta">Hard filters + score</div></article>
+            <article class="panel kpi-card"><div class="label">Median EV/Rev</div><div class="value" id="medianEV">0.0x</div><div class="meta">Growth multiple</div></article>
+            <article class="panel kpi-card"><div class="label">Avg mgmt score</div><div class="value" id="avgMgmt">0.0</div><div class="meta">Public management rubric</div></article>
+          </section>
+
+          <section class="hero-grid">
+            <article class="panel section-card">
+              <div class="section-head">
+                <div>
+                  <h2>Filters</h2>
+                  <p>Hard filters for size, exchange, growth, analyst summaries, and management quality.</p>
+                </div>
+                <div class="chip-row">
+                  <span class="chip">Growth</span>
+                  <span class="chip">EV/Revenue</span>
+                  <span class="chip">Analyst summary</span>
+                  <span class="chip">Management</span>
+                </div>
+              </div>
+              <div class="filters-grid">
+                <label class="field"><span>Min market cap (CAD M)</span><input id="capMin" type="number" value="50"></label>
+                <label class="field"><span>Max market cap (CAD M)</span><input id="capMax" type="number" value="300"></label>
+                <label class="field"><span>Exchange</span><select id="exchange"><option value="All">All</option><option value="TSXV" selected>TSXV</option><option value="TSX">TSX</option></select></label>
+                <label class="field"><span>Min revenue growth %</span><input id="growthMin" type="number" value="15"></label>
+                <label class="field"><span>Min public Buy recs</span><input id="analystMin" type="number" value="0"></label>
+                <label class="field"><span>Min management score</span><input id="mgmtMin" type="number" value="6"></label>
+              </div>
+              <div class="button-row">
+                <button id="runScreen" class="btn btn-primary" type="button">Run screen</button>
+                <button id="resetScreen" class="btn btn-secondary" type="button">Reset</button>
+              </div>
+            </article>
+
+            <aside class="panel section-card">
+              <h2>Scoring weights</h2>
+              <div class="weight-list">
+                <div><div class="weight-row"><span>Growth</span><strong>25%</strong></div><div class="bar"><span style="width:82%"></span></div></div>
+                <div><div class="weight-row"><span>Valuation multiple</span><strong>20%</strong></div><div class="bar"><span style="width:68%"></span></div></div>
+                <div><div class="weight-row"><span>Analyst recommendations</span><strong>15%</strong></div><div class="bar"><span style="width:56%"></span></div></div>
+                <div><div class="weight-row"><span>Management quality</span><strong>25%</strong></div><div class="bar"><span style="width:74%"></span></div></div>
+                <div><div class="weight-row"><span>Liquidity & balance sheet</span><strong>15%</strong></div><div class="bar"><span style="width:61%"></span></div></div>
+              </div>
+              <p class="meta note">Interactive website logic runs fully in the browser, which works well for GitHub Pages-hosted static apps. Public JSON data can also be loaded client-side on static hosting. [web:63][web:65][web:69]</p>
+            </aside>
+          </section>
+
+          <section class="results-grid">
+            <article class="panel section-card table-card">
+              <div class="table-toolbar">
+                <div>
+                  <h2>Ranked results</h2>
+                  <p>Click any row to open company detail.</p>
+                </div>
+                <label class="field compact-field">
+                  <span>Sort by</span>
+                  <select id="sortBy">
+                    <option value="score">Score</option>
+                    <option value="growth">Growth</option>
+                    <option value="evRev">EV/Revenue</option>
+                    <option value="buyRecs">Buy recs</option>
+                    <option value="mgmt">Management</option>
+                  </select>
+                </label>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Ticker</th><th>Company</th><th>Exch.</th><th>Growth</th><th>EV/Rev</th><th>Buy recs</th><th>Mgmt</th><th>Score</th><th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="resultsBody"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <aside class="panel section-card detail-card">
+              <h2>Company detail</h2>
+              <div id="detailEmpty" class="empty-state">Select a company from the table to view management, source, and screening context.</div>
+              <div id="detailPanel" class="detail-panel hidden"></div>
+            </aside>
+          </section>
+        </section>
+
+        <section id="compareView" class="view">
+          <article class="panel section-card">
+            <h2>Compare companies</h2>
+            <p class="meta">Pick two companies to compare public metrics side by side.</p>
+            <div class="compare-controls">
+              <label class="field"><span>Company A</span><select id="compareA"></select></label>
+              <label class="field"><span>Company B</span><select id="compareB"></select></label>
+            </div>
+            <div id="compareTable" class="compare-table"></div>
+          </article>
+        </section>
+
+        <section id="sourcesView" class="view">
+          <article class="panel section-card">
+            <h2>Source framework</h2>
+            <div class="source-grid">
+              <div class="mini-card"><strong>SEDAR+ filings</strong><p>Annual financial statements, MD&amp;A, and AIF can support management, risk, and financial evaluation. [web:23][web:32]</p></div>
+              <div class="mini-card"><strong>Company IR pages</strong><p>Public investor pages often list management bios, presentations, and strategy updates. [web:32]</p></div>
+              <div class="mini-card"><strong>Public analyst summaries</strong><p>Use only publicly visible recommendation summaries, not proprietary full reports. [web:24][web:27]</p></div>
+              <div class="mini-card"><strong>Valuation multiples</strong><p>EV/Revenue is useful when earlier-stage companies are not consistently profitable. [web:25][web:31]</p></div>
+            </div>
+          </article>
+        </section>
+      </main>
     </div>
-  </aside>
-
-  <header class="header">
-    <div>
-      <div class="small">Rapid prototype</div>
-      <strong>Public-Information Microcap Evaluation Tool</strong>
-    </div>
-    <div style="display:flex;gap:12px;align-items:center;">
-      <input class="search" type="text" placeholder="Search ticker, company, or source" aria-label="Search ticker, company, or source">
-      <button class="btn btn-secondary" data-theme-toggle aria-label="Switch theme">◐</button>
-    </div>
-  </header>
-
-  <main id="content" class="main">
-    <section class="kpis">
-      <article class="panel kpi"><h3>Names in sample</h3><div class="value" id="universeCount">10</div><div class="meta">Illustrative Canadian microcap-style universe</div></article>
-      <article class="panel kpi"><h3>Pass screen</h3><div class="value" id="passCount">0</div><div class="meta">Meets public-data filters</div></article>
-      <article class="panel kpi"><h3>Median EV/Rev</h3><div class="value" id="medianEV">0.0x</div><div class="meta">Useful for earlier-stage growth names</div></article>
-      <article class="panel kpi"><h3>Avg mgmt score</h3><div class="value" id="avgMgmt">0</div><div class="meta">Based on public leadership indicators</div></article>
-    </section>
-
-    <section class="hero">
-      <article class="panel section">
-        <h2 style="margin-bottom:.5rem;">Public evaluation criteria</h2>
-        <p style="color:var(--color-text-muted);max-width:72ch;">This version is built to use only publicly available information. It screens on size, exchange, liquidity, growth, valuation multiples, analyst recommendation summaries when public, and management-team quality using public filings and company websites.</p>
-        <div class="controls">
-          <div class="field"><label for="capMin">Min market cap (CAD M)</label><input id="capMin" type="number" value="50"></div>
-          <div class="field"><label for="capMax">Max market cap (CAD M)</label><input id="capMax" type="number" value="300"></div>
-          <div class="field"><label for="exchange">Exchange</label><select id="exchange"><option value="All">All</option><option value="TSXV" selected>TSXV</option><option value="TSX">TSX</option></select></div>
-          <div class="field"><label for="growthMin">Min revenue growth %</label><input id="growthMin" type="number" value="15"></div>
-          <div class="field"><label for="analystMin">Min public Buy recs</label><input id="analystMin" type="number" value="1"></div>
-          <div class="field"><label for="mgmtMin">Min management score</label><input id="mgmtMin" type="number" value="6"></div>
-        </div>
-        <div class="chips">
-          <span class="chip">Revenue growth</span>
-          <span class="chip">EV/Revenue</span>
-          <span class="chip">Analyst summary</span>
-          <span class="chip">Management quality</span>
-          <span class="chip">Public source tags</span>
-        </div>
-        <div class="btns">
-          <button class="btn btn-primary" id="runScreen">Run screen</button>
-          <button class="btn btn-secondary" id="resetScreen">Reset defaults</button>
-        </div>
-      </article>
-
-      <aside class="panel section">
-        <h2 style="margin-bottom:var(--space-3);">Scoring model</h2>
-        <div class="scorebox">
-          <div>
-            <div class="row"><span>Growth strength</span><strong>25%</strong></div>
-            <div class="bar"><span style="width:82%"></span></div>
-          </div>
-          <div>
-            <div class="row"><span>Valuation multiple</span><strong>20%</strong></div>
-            <div class="bar"><span style="width:68%"></span></div>
-          </div>
-          <div>
-            <div class="row"><span>Analyst recommendation</span><strong>15%</strong></div>
-            <div class="bar"><span style="width:55%"></span></div>
-          </div>
-          <div>
-            <div class="row"><span>Management team</span><strong>25%</strong></div>
-            <div class="bar"><span style="width:74%"></span></div>
-          </div>
-          <div>
-            <div class="row"><span>Liquidity and balance sheet</span><strong>15%</strong></div>
-            <div class="bar"><span style="width:61%"></span></div>
-          </div>
-        </div>
-        <div class="small" style="margin-top:var(--space-4);">Management score can combine CEO tenure, public-company experience, insider alignment, and sector relevance. Analyst score should only use public recommendation summaries, not paywalled reports.</div>
-      </aside>
-    </section>
-
-    <section class="grid">
-      <article class="panel section table-wrap">
-        <h2 style="margin-bottom:var(--space-3);">Ranked screen results</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Ticker</th><th>Company</th><th>Exch.</th><th>Growth</th><th>EV/Rev</th><th>Buy recs</th><th>Mgmt</th><th>Source</th><th>Score</th><th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="resultsBody"></tbody>
-        </table>
-      </article>
-
-      <aside class="stack">
-        <article class="panel section">
-          <h2 style="margin-bottom:var(--space-3);">Public source map</h2>
-          <ul class="source-list">
-            <li>SEDAR+ filings: annual financials, MD&amp;A, and AIF.</li>
-            <li>Company investor relations pages: management bios and presentations.</li>
-            <li>Exchange or market pages: market cap, trading volume, listing status.</li>
-            <li>Public finance pages: consensus recommendation summaries, if visible.</li>
-          </ul>
-        </article>
-        <article class="panel section">
-          <h2 style="margin-bottom:var(--space-3);">Management rubric</h2>
-          <div class="stack">
-            <div class="mini"><strong>Leadership tenure</strong><div class="small">Higher score for stable leadership in current role.</div></div>
-            <div class="mini"><strong>Relevant experience</strong><div class="small">Prior listed-company or sector operating experience.</div></div>
-            <div class="mini"><strong>Alignment</strong><div class="small">Insider ownership or visible founder involvement.</div></div>
-            <div class="mini"><strong>Governance check</strong><div class="small">Board depth and no obvious turnover red flags.</div></div>
-          </div>
-        </article>
-      </aside>
-    </section>
-  </main>
-</div>
-<script>
-const companies = [
-  {ticker:'PNG', company:'Kraken Robotics', exchange:'TSXV', marketCap:265, growth:28, evRev:4.8, buyRecs:2, mgmt:8, volume:356000, netCash:true, source:'Filings + IR + public finance'},
-  {ticker:'QNC', company:'Quantum eMotion', exchange:'TSXV', marketCap:92, growth:34, evRev:5.9, buyRecs:1, mgmt:7, volume:118000, netCash:true, source:'Filings + IR'},
-  {ticker:'AEP', company:'Atlas Engineered Products', exchange:'TSXV', marketCap:74, growth:18, evRev:1.6, buyRecs:0, mgmt:6, volume:82000, netCash:false, source:'Filings + exchange'},
-  {ticker:'MKO', company:'Mako Mining', exchange:'TSXV', marketCap:279, growth:21, evRev:2.1, buyRecs:1, mgmt:8, volume:134000, netCash:true, source:'Filings + IR + public finance'},
-  {ticker:'TETH', company:'Tenth Avenue Petroleum', exchange:'TSXV', marketCap:58, growth:9, evRev:1.2, buyRecs:0, mgmt:5, volume:29000, netCash:false, source:'Filings + exchange'},
-  {ticker:'RHT', company:'Reliq Health', exchange:'TSXV', marketCap:54, growth:22, evRev:2.0, buyRecs:0, mgmt:6, volume:201000, netCash:false, source:'Filings + IR'},
-  {ticker:'LBNK', company:'LithiumBank', exchange:'TSXV', marketCap:167, growth:26, evRev:2.8, buyRecs:1, mgmt:7, volume:38000, netCash:true, source:'Filings + IR + public finance'},
-  {ticker:'QYOU', company:'QYOU Media', exchange:'TSXV', marketCap:51, growth:16, evRev:0.9, buyRecs:0, mgmt:5, volume:44000, netCash:false, source:'Filings + IR'},
-  {ticker:'XTRA', company:'Xtract One', exchange:'TSX', marketCap:156, growth:31, evRev:4.1, buyRecs:2, mgmt:8, volume:97000, netCash:true, source:'Filings + public finance'},
-  {ticker:'GRN', company:'Greenlane Renewables', exchange:'TSX', marketCap:214, growth:17, evRev:1.8, buyRecs:1, mgmt:7, volume:154000, netCash:true, source:'Filings + IR + exchange'}
-];
-
-const els = {
-  capMin: document.getElementById('capMin'), capMax: document.getElementById('capMax'), exchange: document.getElementById('exchange'),
-  growthMin: document.getElementById('growthMin'), analystMin: document.getElementById('analystMin'), mgmtMin: document.getElementById('mgmtMin'), resultsBody: document.getElementById('resultsBody')
-};
-
-function calcScore(c){
-  const growthScore = Math.min(25, (c.growth / 35) * 25);
-  const valuationScore = Math.max(0, 20 - Math.max(0, c.evRev - 2.5) * 3.2);
-  const analystScore = Math.min(15, c.buyRecs * 7.5);
-  const mgmtScore = (c.mgmt / 10) * 25;
-  const riskScore = Math.min(15, (c.volume / 200000) * 8 + (c.netCash ? 7 : 2));
-  return Math.round(growthScore + valuationScore + analystScore + mgmtScore + riskScore);
-}
-
-function status(score){
-  if(score >= 72) return ['Pass', 'pass'];
-  if(score >= 58) return ['Watch', 'watch'];
-  return ['Risk', 'risk'];
-}
-
-function median(arr){ if(!arr.length) return 0; const s=[...arr].sort((a,b)=>a-b); return s[Math.floor(s.length/2)]; }
-function average(arr){ return arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length) : 0; }
-
-function render(){
-  const filtered = companies
-    .filter(c => c.marketCap >= Number(els.capMin.value || 0))
-    .filter(c => c.marketCap <= Number(els.capMax.value || 9999))
-    .filter(c => els.exchange.value === 'All' ? true : c.exchange === els.exchange.value)
-    .filter(c => c.growth >= Number(els.growthMin.value || 0))
-    .filter(c => c.buyRecs >= Number(els.analystMin.value || 0))
-    .filter(c => c.mgmt >= Number(els.mgmtMin.value || 0))
-    .map(c => ({...c, score: calcScore(c)}))
-    .sort((a,b) => b.score - a.score);
-
-  els.resultsBody.innerHTML = filtered.map(c => {
-    const [label, cls] = status(c.score);
-    return `<tr>
-      <td><strong>${c.ticker}</strong></td>
-      <td>${c.company}</td>
-      <td>${c.exchange}</td>
-      <td>${c.growth}%</td>
-      <td>${c.evRev.toFixed(1)}x</td>
-      <td>${c.buyRecs}</td>
-      <td>${c.mgmt}/10</td>
-      <td><span class="source-tag">${c.source}</span></td>
-      <td><strong>${c.score}</strong></td>
-      <td><span class="pill ${cls}">${label}</span></td>
-    </tr>`;
-  }).join('');
-
-  document.getElementById('universeCount').textContent = companies.length;
-  document.getElementById('passCount').textContent = filtered.filter(c => c.score >= 72).length;
-  document.getElementById('medianEV').textContent = filtered.length ? median(filtered.map(c => c.evRev)).toFixed(1) + 'x' : '0.0x';
-  document.getElementById('avgMgmt').textContent = filtered.length ? average(filtered.map(c => c.mgmt)).toFixed(1) : '0';
-}
-
-document.getElementById('runScreen').addEventListener('click', render);
-document.getElementById('resetScreen').addEventListener('click', () => {
-  els.capMin.value = 50; els.capMax.value = 300; els.exchange.value = 'TSXV'; els.growthMin.value = 15; els.analystMin.value = 1; els.mgmtMin.value = 6; render();
-});
-(function(){const t=document.querySelector('[data-theme-toggle]');const r=document.documentElement;let d=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';r.setAttribute('data-theme',d);t.addEventListener('click',()=>{d=d==='dark'?'light':'dark';r.setAttribute('data-theme',d);});})();
-render();
-</script>
+  </div>
+  <script src="./app.js" defer></script>
 </body>
 </html>
